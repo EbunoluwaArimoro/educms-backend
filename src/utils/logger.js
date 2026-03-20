@@ -26,24 +26,31 @@ const transports = [
   })
 ];
 
-// Only add file logging if we are NOT on Vercel (production)
-if (process.env.NODE_ENV !== 'production') {
-  const fs = require('fs');
-  const logsDir = path.join(process.cwd(), 'logs');
-  
-  if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir);
-  }
+// BULLETPROOF CHECK: Try to create logs, but fail silently if Vercel blocks it
+try {
+  // Vercel automatically sets a 'VERCEL' environment variable we can check
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const fs = require('fs');
+    const logsDir = path.join(process.cwd(), 'logs');
+    
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir); // This is what Vercel was rejecting
+    }
 
-  transports.push(
-    new winston.transports.File({
-      filename: path.join('logs', 'error.log'),
-      level: 'error'
-    }),
-    new winston.transports.File({
-      filename: path.join('logs', 'combined.log')
-    })
-  );
+    transports.push(
+      new winston.transports.File({
+        filename: path.join('logs', 'error.log'),
+        level: 'error'
+      }),
+      new winston.transports.File({
+        filename: path.join('logs', 'combined.log')
+      })
+    );
+  }
+} catch (error) {
+  // If Vercel throws the EROFS error, we catch it here and ignore it.
+  // The app will survive and continue running using only the Console logger.
+  console.warn('Read-only file system detected. File logging disabled.');
 }
 
 // Create logger instance
