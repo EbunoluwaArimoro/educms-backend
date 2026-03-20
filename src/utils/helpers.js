@@ -1,33 +1,29 @@
-const winston = require('winston');
+const successResponse = (data, message = 'Success') => {
+  return {
+    success: true,
+    message,
+    data
+  };
+};
 
-// Define log format
-const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.errors({ stack: true }),
-  winston.format.splat(),
-  winston.format.json()
-);
+const errorResponse = (message = 'Server Error') => {
+  return {
+    success: false,
+    message
+  };
+};
 
-// Console format
-const consoleFormat = winston.format.combine(
-  winston.format.colorize(),
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.printf(({ timestamp, level, message, ...meta }) => {
-    let metaString = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
-    return `${timestamp} [${level}]: ${message} ${metaString}`;
-  })
-);
+const generateSlug = (text) => {
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+    .replace(/^-+/, '')             // Trim - from start of text
+    .replace(/-+$/, '');            // Trim - from end of text
+};
 
-// Create logger instance - ONLY logging to console
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  format: logFormat,
-  defaultMeta: { service: 'educms-api' },
-  transports: [
-    new winston.transports.Console({
-      format: consoleFormat
-    })
-  ]
-});
-
-module.exports = logger;
+module.exports = {
+  successResponse,
+  errorResponse,
+  generateSlug
+};
