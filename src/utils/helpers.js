@@ -1,5 +1,4 @@
 const winston = require('winston');
-const path = require('path');
 
 // Define log format
 const logFormat = winston.format.combine(
@@ -9,7 +8,7 @@ const logFormat = winston.format.combine(
   winston.format.json()
 );
 
-// Console format for development
+// Console format
 const consoleFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -19,35 +18,16 @@ const consoleFormat = winston.format.combine(
   })
 );
 
-// Create logger instance
+// Create logger instance - ONLY logging to console
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: logFormat,
   defaultMeta: { service: 'educms-api' },
   transports: [
-    // Write all logs to console
     new winston.transports.Console({
       format: consoleFormat
-    }),
-    
-    // Write all logs with level 'error' and below to error.log
-    new winston.transports.File({
-      filename: path.join('logs', 'error.log'),
-      level: 'error'
-    }),
-    
-    // Write all logs to combined.log
-    new winston.transports.File({
-      filename: path.join('logs', 'combined.log')
     })
   ]
 });
-
-// Create logs directory if it doesn't exist
-const fs = require('fs');
-const logsDir = path.join(process.cwd(), 'logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir);
-}
 
 module.exports = logger;
