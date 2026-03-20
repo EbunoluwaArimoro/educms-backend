@@ -1,12 +1,21 @@
 const Post = require('../models/Post');
-const { successResponse, errorResponse, generateSlug, paginate, getPaginationMeta } = require('../utils/helpers');
+const { successResponse, errorResponse, generateSlug, paginate } = require('../utils/helpers');
 
 exports.getPosts = async (req, res, next) => {
   try {
-    const { page, limit, offset } = paginate(req.query.page, req.query.limit);
+    // 1. Force strings from URL to be Numbers and set defaults
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    
+    // 2. Manually calculate offset for the SQL query
+    const offset = (page - 1) * limit;
+
+    // 3. Fetch data from Supabase via the Post model
     const { posts, total } = await Post.findAll({ limit, offset });
     
-    const meta = getPaginationMeta(total, page, limit);
+    // 4. Generate the pagination metadata for the response
+    const meta = paginate(total, page, limit);
+
     res.status(200).json(successResponse({ posts, meta }, 'Posts retrieved successfully'));
   } catch (error) {
     next(error);
