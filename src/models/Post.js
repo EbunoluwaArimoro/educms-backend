@@ -32,26 +32,32 @@ const Post = {
   },
 
   async create(postData) {
-    const { title, slug, content, excerpt, author_id, category_id, status, featured_image } = postData;
+    // 1. Added published_at to destructuring
+    const { title, slug, content, excerpt, author_id, category_id, status, featured_image, published_at } = postData;
+    
     const query = `
-      INSERT INTO posts (title, slug, content, excerpt, author_id, category_id, status, featured_image)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO posts (title, slug, content, excerpt, author_id, category_id, status, featured_image, published_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
-    const values = [title, slug, content, excerpt, author_id, category_id, status || 'draft', featured_image];
+    // 2. Added published_at to the values array
+    const values = [title, slug, content, excerpt, author_id, category_id, status || 'draft', featured_image, published_at || null];
     const { rows } = await db.query(query, values);
     return rows[0];
   },
 
   async update(id, postData) {
-    const { title, content, status, category_id } = postData;
+    // 1. Added published_at to destructuring
+    const { title, content, status, category_id, published_at } = postData;
+    
     const query = `
       UPDATE posts 
-      SET title = $1, content = $2, status = $3, category_id = $4, updated_at = CURRENT_TIMESTAMP
-      WHERE post_id = $5
+      SET title = $1, content = $2, status = $3, category_id = $4, published_at = $5, updated_at = CURRENT_TIMESTAMP
+      WHERE post_id = $6
       RETURNING *
     `;
-    const { rows } = await db.query(query, [title, content, status, category_id, id]);
+    // 2. Added published_at to the values array at index $5
+    const { rows } = await db.query(query, [title, content, status, category_id, published_at, id]);
     return rows[0];
   },
 
