@@ -15,15 +15,29 @@ const errorResponse = (message = 'Server Error') => {
 
 const generateSlug = (text) => {
   return text.toString().toLowerCase()
-    .replace(/\s+/g, '-')           // Replace spaces with -
-    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-    .replace(/^-+/, '')             // Trim - from start of text
-    .replace(/-+$/, '');            // Trim - from end of text
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+};
+
+// --- ADD THIS FUNCTION BELOW ---
+const paginate = (totalItems, currentPage, limit) => {
+  const totalPages = Math.ceil(totalItems / limit);
+  return {
+    totalItems: parseInt(totalItems),
+    totalPages,
+    currentPage: parseInt(currentPage),
+    limit: parseInt(limit),
+    hasNextPage: currentPage < totalPages,
+    hasPrevPage: currentPage > 1
+  };
 };
 
 module.exports = {
   successResponse,
   errorResponse,
-  generateSlug
+  generateSlug,
+  paginate // Make sure to export it!
 };
