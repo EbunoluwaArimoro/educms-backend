@@ -24,6 +24,11 @@ app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev')); // Request logging
 
+// ==========================================
+// Ignore browser favicon requests
+// ==========================================
+app.get(['/favicon.ico', '/favicon.png'], (req, res) => res.status(204).end());
+
 // API Routes
 const apiRouter = express.Router();
 app.use(`/api/${process.env.API_VERSION || 'v1'}`, apiRouter);
